@@ -52,6 +52,10 @@ class Dog
         WHERE name = ? AND breed = ?
         LIMIT 1
         SQL
-        DB[:conn].execute(sql, self.name, self.breed)
+        dog = DB[:conn].execute(sql, self.name, self.breed)
+
+        # if !dog.empty?
+
+        binding.pry
     end
 end
