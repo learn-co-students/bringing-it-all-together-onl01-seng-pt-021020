@@ -38,8 +38,13 @@ class Dog
     end 
 
     def self.new_from_db(row)
-        new_dog = create(name:row[1],breed:row[2])    
-    end
+        attributes_hash = {
+          :id => row[0],
+          :name => row[1],
+          :breed => row[2]
+        }
+        self.new(attributes_hash)
+      end
 
     def self.find_by_id(num)
         row = DB[:conn].execute("SELECT * FROM dogs WHERE id = ?",num)[0][0] #sets row  = array of data from dogs table based on ID
@@ -52,10 +57,25 @@ class Dog
         WHERE name = ? AND breed = ?
         LIMIT 1
         SQL
-        dog = DB[:conn].execute(sql, self.name, self.breed)
-
-        # if !dog.empty?
-
-        binding.pry
+        dog = DB[:conn].execute(sql, row[:name], row[:breed])
+        if dog.empty?  #if the arguement hash is empty, calls create method and passes in the hash(row)
+            create(row)
+        else
+            dog = dog[0]  #sets the variable dog = to the array of the returned dog
+            dog = Dog.new(id:dog[0],name:dog[1],breed:dog[2])  #creates a new instance with the dog array
+        end
     end
+
+    def self.find_by_name(name)
+        dog = DB[:conn].execute("SELECT * FROM dogs WHERE name = ? LIMIT 1;", name)
+        dog.map do |n|
+            self.new_from_db(n)
+        end.first
+    end
+
+    def update
+        sql = "UPDATE dogs SET name = ?, breed = ?  WHERE id = ?"
+        DB[:conn].execute(sql, self.name, self.breed, self.id)
+    end
+
 end
