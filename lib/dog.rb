@@ -1,3 +1,6 @@
+# Mapping database tables to classes 
+# Mapping instances of classes to rows in those tables.
+
 class Dog 
   attr_accessor :id, :name, :breed 
   
@@ -23,6 +26,7 @@ class Dog
   end 
   
   def save 
+    #Save methods handle the common action of INSERTing data into the database. 
     sql = <<-SQL 
       INSERT INTO dogs (name, breed) VALUES (?, ?)
     SQL
@@ -32,6 +36,8 @@ class Dog
     #We save the id separately because the id comes from the database.
     self
   end 
+  
+  
   
   def self.create(name: name, breed: breed)
     #take in hash of attributes and uses metaprogramming to create a new dog object
