@@ -5,6 +5,7 @@ class Dog
 
   def initialize(attr_hash)
     attr_hash.each {|k, v| self.send(("#{k}="), v)}
+    id == nil
   end
 
   def self.create_table
