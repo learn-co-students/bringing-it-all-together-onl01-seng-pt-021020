@@ -38,20 +38,30 @@ class Dog
   #Remember that the INTEGER PRIMARY KEY datatype will assign and auto-increment the id attribute of each record that gets saved.
   
   #The moment in which we create a new Song instance with the #new method is different than the moment in which we save a representation of that song to our database. The #new method creates a new instance of the song class, a new Ruby object. The #save method takes the attributes that characterize a given song and saves them in a new row of the songs table in our database.
+  
+  #We need our #save method to check to see if the object it is being called on has already been persisted. If so, don't INSERT a new row into the database, simply update an existing one. Now that we have our handy #update method ready to go, this should be easy.
+  
+  #How do we know if an object has been persisted? If it has an id that is not nil. Remember that an object's id attribute gets set only once it has been INSERTed into the database. We tackle this with the following if statement:
     
     
   def save 
-    sql = <<-SQL 
-      INSERT INTO dogs (name, breed) VALUES (?, ?)
-    SQL
-    DB[:conn].execute(sql, self.name, self.breed)
-    #self.name and self.breed go into the respective question marks above 
-    @id = DB[:conn].execute("SELECT last_insert_rowid() FROM dogs")[0][0]
-    #At the end of our save method, we use a SQL query to grab the value of the ID column of the last inserted row, and set that equal to the given song instance's id attribute.
-    self
+    if self.id
+      self.update
+    else
+      sql = <<-SQL 
+       INSERT INTO dogs (name, breed) VALUES (?, ?)
+      SQL
+      DB[:conn].execute(sql, self.name, self.breed)
+      #self.name and self.breed go into the respective question marks above 
+      @id = DB[:conn].execute("SELECT last_insert_rowid() FROM dogs")[0][0]
+      #what's returned here is an array that contains one array that contains one element––the last inserted row ID
+      #At the end of our save method, we use a SQL query to grab the value of the ID column of the last inserted row, and set that equal to the given song instance's id attribute.
+      self
+    end 
   end 
   
-  
+  #This method will wrap the code we used above to create a new Song instance and save it.
+  #Here, we use keyword arguments to pass a name and album into our .create method. We use that name and album to instantiate a new song. Then, we use the #save method to persist that song to the database.
   
   def self.create(name: name, breed: breed)
     #take in hash of attributes and uses metaprogramming to create a new dog object
@@ -60,6 +70,10 @@ class Dog
     #saves this dog to the database
     dog.save
   end 
+  
+  #New_from_db: The first thing we need to do is convert what the database gives us into a Ruby object. We will use this method to create all the Ruby objects in our next two methods.
+  
+ # Since we're retrieving data from a database, we are using new. We don't need to create records. With this method, we're reading data from SQLite and temporarily representing that data in Ruby.
   
   def self.new_from_db(row_from_db)
     #creates an instance with corresponding attribute values 
@@ -110,6 +124,8 @@ class Dog
     #new_from_db takes in a row from the database, new_dog is a row from the database 
 
   end 
+  
+  #The best way for us to do this is to simply update all the attributes whenever we update a record. That way, we will catch any changed attributes, while the un-changed ones will simply remain the same.
   
   def update
     sql = "UPDATE dogs SET name = ?, breed = ?  WHERE id = ?"
