@@ -1,11 +1,9 @@
 class Dog
 
-  attr_reader :id
-  attr_accessor :name, :breed
+  attr_accessor :id, :name, :breed
 
   def initialize(attr_hash)
     attr_hash.each {|k, v| self.send(("#{k}="), v)}
-    id == nil
   end
 
   def self.create_table
