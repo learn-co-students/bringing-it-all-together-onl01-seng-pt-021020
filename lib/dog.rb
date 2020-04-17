@@ -2,8 +2,10 @@ class Dog
 
   attr_accessor :id, :name, :breed
 
-  def initialize(attr_hash)
-    attr_hash.each {|k, v| self.send(("#{k}="), v)}
+  def initialize(id: nil, name:, breed:)
+    @id = id
+    @name = name
+    @breed = breed
   end
 
   def self.create_table
@@ -39,18 +41,27 @@ class Dog
     id = row[0]
     name = row[1]
     breed = row[2]
-    Dog.new(attr_hash)
+    Dog.new
   end
 
+  def self.find_by_id(id)
+    sql = <<-SQL
+    SELECT * FROM dogs WHERE id = ?
+    SQL
+    DB[:conn].execute(sql, self.id)[0][0]
+  end
 
+  def self.find_or_create_by
 
+  end
 
+  def self.find_by_name
 
+  end
 
+  def update
 
-
-
-
+  end
 
 
 
