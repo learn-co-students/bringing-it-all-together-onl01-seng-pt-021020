@@ -30,6 +30,14 @@ class Dog
     self
   end
 
+  def self.create(attr)
+    dog = Dog.new(attr)
+    dog.save
+    dog 
+  end
+
+
+
 
 
 
