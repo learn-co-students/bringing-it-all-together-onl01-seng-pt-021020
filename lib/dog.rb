@@ -91,22 +91,27 @@ class Dog
     new_dog
   end
   
-  def self.find_or_create_by(name:name, breed:breed)
+  def self.find_or_create_by(name:, breed:)
     #if it exists, we want to find the dog in the database. If it doesn't exist, we want to create it.
+    #First, we query the database: does a record exist that has this name and album?
     sql = <<-SQL 
       SELECT * FROM dogs WHERE name = ? AND breed = ? LIMIT 1 
     SQL
     dog = DB[:conn].execute(sql, name, breed)
-    #why not dog = DB[:conn].execute(sql, self.name, self.breed)?
+    
     
     #the above line is the query. If the dog does exists, we want to find it: 
     if !dog.empty?
+      
+      #when two dogs have the same name and different breed, it returns the correct dog. Set dog equal to 1.
+      #If this is the case, then the statement: !song.empty? will return true. Therefore, we will use the returned values to make a new "Dog" object that Ruby can play around with, but we will not save it to the database. That re-instantiation of an existing Dog object is accomplished with these lines:
       dog = dog[0]
-      #when two dogs have the same name and different breed, it returns the correct dog. Set dog equal to 1 
       new_dog = Dog.new(id:dog[0],name:dog[1],breed:dog[2])
     else
+      #However, if no record exists that matches the name and album passed in as arguments, then !song.empty? will return false, and we will instead create and save a new Song instance with the #create method.
       new_dog = self.create(name:name,breed:breed)
     end
+    #At the end of our #find_or_create_by method, we will return the song object whose database entry we either found or created. This method assumes that there isn't already a song object matching these attributes, but that there may already exist a database entry with the same name and album. Therefore, it instantiates a new instance of the Song class while preventing a duplicate database entry.
     new_dog 
   end 
   
