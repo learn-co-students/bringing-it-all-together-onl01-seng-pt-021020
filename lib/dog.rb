@@ -1,11 +1,10 @@
 class Dog
+
   attr_reader :id
   attr_accessor :name, :breed
 
-  def initialize(id=nil, name, breed)
-    @id = id
-    @name = name
-    @breed = breed
+  def initialize(attr, id=nil)
+    attr.each {|k, v| self.send(("#{k}="), v)}
   end
 
   def self.create_table
@@ -17,9 +16,18 @@ class Dog
 
   def self.drop_table
     sql = <<-SQL
-    DROP TABLE dogs 
+    DROP TABLE dogs
     SQL
     DB[:conn].execute(sql)
+  end
+
+  def save
+    sql = <<-SQL
+    INSERT INTO dogs (name, breed) VALUES (?, ?)
+    SQL
+    DB[:conn].execute(sql, self.name, self.breed)
+    @id = DB[:conn].execute("SELECT last_insert_rowid() FROM dogs")[0][0]
+    self
   end
 
 
