@@ -10,6 +10,8 @@ class Dog
     @breed = breed 
   end 
   
+  #When we create a new song with the Song.new method, we do not set that song's id. A song gets an id only when it gets saved into the database. We therefore set the default value of the id argument that the #initialize method takes equal to nil, so that we can create new song instances that *do not have an id value. 
+  
   def self.create_table 
     sql = <<-SQL
       CREATE TABLE IF NOT EXISTS dogs (id INTEGER PRIMARY KEY, name TEXT, breed TEXT)
@@ -18,6 +20,10 @@ class Dog
     #need to tell the database to EXECUTE THE SQL 
   end 
   
+  #To "map" our class to a database table, we will create a table with the same name as our class and give that table column names that match the attr_accessors of our class.
+  
+  
+  
   def self.drop_table
     sql = <<-SQL 
       DROP TABLE IF EXISTS dogs 
@@ -25,15 +31,23 @@ class Dog
     DB[:conn].execute(sql)
   end 
   
+  
+  #Save methods handle the common action of INSERTing data into the database. 
+  #Actually, we are not saving Ruby objects in our database. We are going to take the individual attributes of a given instance, in this case a dog's name and breed, and save those attributes that describe an individual dog to the database as one, single row.
+  
+  #Remember that the INTEGER PRIMARY KEY datatype will assign and auto-increment the id attribute of each record that gets saved.
+  
+  #The moment in which we create a new Song instance with the #new method is different than the moment in which we save a representation of that song to our database. The #new method creates a new instance of the song class, a new Ruby object. The #save method takes the attributes that characterize a given song and saves them in a new row of the songs table in our database.
+    
+    
   def save 
-    #Save methods handle the common action of INSERTing data into the database. 
     sql = <<-SQL 
       INSERT INTO dogs (name, breed) VALUES (?, ?)
     SQL
     DB[:conn].execute(sql, self.name, self.breed)
     #self.name and self.breed go into the respective question marks above 
     @id = DB[:conn].execute("SELECT last_insert_rowid() FROM dogs")[0][0]
-    #We save the id separately because the id comes from the database.
+    #At the end of our save method, we use a SQL query to grab the value of the ID column of the last inserted row, and set that equal to the given song instance's id attribute.
     self
   end 
   
